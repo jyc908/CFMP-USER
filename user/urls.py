@@ -25,5 +25,6 @@ urlpatterns += [
     path('user/followee/',views.FolloweeUserViewSet.as_view(), name = 'user-followee-list'),
     path('user/chat/<int:user_id>/',  views.ChatLogViewSet.as_view(), name = 'user-chat-detail'),
     path('user/message/',  views.MessageViewSet.as_view(), name='user-message-list'),
-    path('user/password/',views.getPassword.as_view())
+    path('user/password/',views.getPassword.as_view(),name="user-get-password"),
+    
 ]
