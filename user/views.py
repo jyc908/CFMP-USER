@@ -230,6 +230,7 @@ def generate_jwt_token(user):
     为指定用户生成JWT token
     """
     salt = settings.SECRET_KEY
+    print(salt)
     headers = {
         'typ': 'jwt',
         'alg': 'HS256'
@@ -237,7 +238,7 @@ def generate_jwt_token(user):
     payload = {
         'user_id': user.user_id,
         'username': user.username,
-        'iss': settings.ISS,
+        'key': settings.ISS,
         'exp': datetime.now(timezone.utc) + timedelta(days=3)  # 延长token有效期为3天
     }
     token = jwt.encode(payload=payload, key=salt, algorithm="HS256", headers=headers)
