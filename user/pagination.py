@@ -3,7 +3,7 @@ from rest_framework.response import Response
 
 
 class StandardResultsSetPagination(PageNumberPagination):
-    """默认每页20个，最多100个"""
+    """默认每页20个,最多100个"""
 
     page_size = 20
     page_query_param = "page"

@@ -7,7 +7,7 @@ from user.models import User
 
 class JWTAuthentication(BaseAuthentication):
     """
-    JWT认证类，用于处理请求头中的token认证
+    JWT认证类,用于处理请求头中的token认证
     """
     def authenticate(self, request):
         """
