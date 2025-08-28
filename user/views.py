@@ -26,10 +26,15 @@ from django.conf import settings
 from jwt import exceptions
 from django.core.mail import send_mail
 import random
-#from config.authentication import JWTAuthentication
-#from product.models import Product
-#from product.serializers import ProductSerializer
-#from root.serializers import ComplaintSerializer
+from config.authentication import JWTAuthentication
+
+'''
+from product.models import Product
+from product.serializers import ProductSerializer
+from root.serializers import ComplaintSerializer
+'''
+
+
 from django.core.mail import send_mail
 from django.contrib.auth.hashers import make_password
 from django.contrib.auth.hashers import check_password
@@ -86,6 +91,7 @@ def varify_captcha(email,captcha):
     return 0
 
 class CaptchaView(APIView):
+    authentication_classes = []
     throttle_classes  = [EmailRateThrottle]
     def post(self, request):
         email = request.data.get('email')
@@ -147,7 +153,7 @@ class CaptchaView(APIView):
                 "fail_msg":"参数错误"
             },status=status.HTTP_400_BAD_REQUEST)
 class RegisterView(APIView):
-
+    authentication_classes = []
     def post(self, request):
         username = request.data.get('username')
         password = request.data.get('password')
@@ -300,7 +306,7 @@ class login_passwordView(APIView):
             }, status=status.HTTP_404_NOT_FOUND)
 
 class login_captchaView(APIView):
-
+    authentication_classes = []
     def post(self, request):
         email = request.data.get('email')
         captcha = request.data.get('captcha')
@@ -403,7 +409,7 @@ class UploadAvatarView(APIView):
             }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
-
+'''
 class UserProductsViewSet(ListCreateAPIView):
     permission_classes = [IsAuthenticated]
     serializer_class = ProductSerializer
@@ -423,7 +429,7 @@ class UserComplaintViewSet(ListCreateAPIView):
     def perform_create(self, serializer):
         # 自动将当前登录用户绑定到complainer_id字段
         serializer.save(complainer_id=self.request.user)
-
+'''
 class FollowUserDetailsViewSet(ListCreateAPIView,  RetrieveUpdateDestroyAPIView):
     permission_classes = [IsAuthenticated]
     serializer_class = FollowSerializer

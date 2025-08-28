@@ -50,10 +50,10 @@ INSTALLED_APPS = [
     'django_apscheduler',
     'minio_storage',
     "rest_framework",
-    "product",
-    "root",
+    #"product",
+    #"root",
     "user",
-    "order",
+    #"order",
 #     python manage.py migrate --fake django_apscheduler zero
 ]# 指定媒体文件的URL前缀（相对路径）
 
@@ -116,11 +116,11 @@ TEMPLATES = [
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'HOST': os.environ.get('DB_HOST', '123.57.145.79'),
+        'HOST': os.environ.get('DB_HOST', 'localhost'),
         'PORT': os.environ.get('DB_PORT', '3306'),
         'NAME': os.environ.get('DB_NAME', 'cfmp_db'),
         'USER': os.environ.get('DB_USER', 'root'),
-        'PASSWORD': os.environ.get('DB_PASSWORD', 'No5_Group_DB'),
+        'PASSWORD': os.environ.get('DB_PASSWORD', '123456'),
         # 为了安全，测试中不允许使用生产数据库
         'TEST': {
             'NAME': 'test_cfmp_db_1',# 明确指定测试数据库名
