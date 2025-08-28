@@ -225,6 +225,23 @@ class RegisterView(APIView):
             "user_id":user.user_id
         })
 import threading
+def generate_jwt_token(user):
+    """
+    为指定用户生成JWT token
+    """
+    salt = settings.SECRET_KEY
+    headers = {
+        'typ': 'jwt',
+        'alg': 'HS256'
+    }
+    payload = {
+        'user_id': user.user_id,
+        'username': user.username,
+        'iss': settings.ISS,
+        'exp': datetime.now(timezone.utc) + timedelta(days=3)  # 延长token有效期为3天
+    }
+    token = jwt.encode(payload=payload, key=salt, algorithm="HS256", headers=headers)
+    return token
 class login_passwordView(APIView):
     authentication_classes = []
     _lock = threading.Lock()
@@ -260,17 +277,6 @@ class login_passwordView(APIView):
             },status=status.HTTP_400_BAD_REQUEST)
         #print(user)
         if user:
-            salt = settings.SECRET_KEY
-            headers = {
-                'typ':'jwt',
-                'alg':'HS256'
-            }
-            print(user.username)
-            payload = {
-                'user_id': user.user_id,
-                'username': user.username,
-                'exp':datetime.now(timezone.utc) + timedelta(days=3)  # 延长token有效期为60分钟
-            }
             if user.status==1:
                 return Response({
                     "success":False,
@@ -278,7 +284,7 @@ class login_passwordView(APIView):
                     "fail_msg":"用户已被封禁"
                 },status=status.HTTP_401_UNAUTHORIZED)
 
-            token = jwt.encode(payload = payload, key = salt, algorithm="HS256", headers=headers)
+            token = generate_jwt_token(user)
             url= None
             if user.avatar:
                 url = user.avatar.url
@@ -322,19 +328,7 @@ class login_captchaView(APIView):
         user = user.first()
         print(user)
         if user:
-            salt = settings.SECRET_KEY
-            headers = {
-                'typ':'jwt',
-                'alg':'HS256'
-            }
-            print(user.username)
-            payload = {
-                'user_id': user.user_id,
-                'username': user.username,
-                'exp':datetime.now(timezone.utc) + timedelta(days=3)  # 延长token有效期为60分钟
-            }
-
-            token = jwt.encode(payload = payload, key = salt, algorithm="HS256", headers=headers)
+            token = generate_jwt_token(user)
             url= None
             if user.avatar:
                 url = user.avatar.url
