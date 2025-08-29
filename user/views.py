@@ -27,7 +27,7 @@ from jwt import exceptions
 from django.core.mail import send_mail
 import random
 from config.authentication import JWTAuthentication
-
+import uuid
 '''
 from product.models import Product
 from product.serializers import ProductSerializer

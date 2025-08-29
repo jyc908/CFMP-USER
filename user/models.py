@@ -1,6 +1,6 @@
 from django.db import models
 from minio_storage import MinioMediaStorage
-
+import uuid
 # User数据表：user, captcha, chatlog, follow, messages
 # NOTE:
 # 无外键引用的情况
@@ -16,7 +16,7 @@ class User(models.Model):
         (BANNED, '已封禁'),
     ]
 
-    user_id = models.BigAutoField(primary_key=True)
+    user_id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     username = models.CharField(max_length=30)
     password = models.CharField(max_length=200)
     email = models.CharField(max_length=50)
