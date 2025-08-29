@@ -18,6 +18,7 @@ urlpatterns += [
     path('captcha/', views.CaptchaView.as_view(), name='captcha'),
     path('user/<int:user_id>/', views.UserIdViewSet.as_view(), name='user'),
     path('user/me/',  views.UserInfoView.as_view(), name='update_user'),
+    path('user/<int:user_id>/update/', views.UpdateUserInfoView.as_view(), name='update_specific_user'),
     #path('user/me/products/<int:user_id>/', views.UserProductsViewSet.as_view(), name='user-products'),
     #path('user/complaint/',views.UserComplaintViewSet.as_view(), name='user-complaint'),
     path('user/follow/<int:followee>/',views.FollowUserDetailsViewSet.as_view(), name='user-follow-detail'),

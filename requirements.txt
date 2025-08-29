@@ -16,3 +16,4 @@ daphne==4.2.0
 mysqlclient>=2.2.0,<3.0.0
 pytest==8.3.4
 pytest-django==4.9.0
+nacos-sdk-python==2.0.9

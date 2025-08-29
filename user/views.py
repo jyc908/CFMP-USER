@@ -358,21 +358,21 @@ class UserIdViewSet(RetrieveUpdateDestroyAPIView):
 class UserInfoView(ListCreateAPIView,RetrieveUpdateDestroyAPIView):
     queryset = User.objects.all()
     serializer_class = UserSerializer
-    permission_classes = [IsAuthenticated]
+    #permission_classes = [IsAuthenticated]
 
     def get_object(self):
         # 直接返回当前请求的用户对象（通过 Token 解析出的用户）
-        print(1)
-        print(1234)
+        #print(1)
+        #print(1234)
         return self.request.user
     def get_queryset(self):
-        print(2)
-        print(123)
+        #print(2)
+        #print(123)
         return User.objects.filter(user_id=self.request.user.user_id)
 
 
 class UploadAvatarView(APIView):
-    permission_classes = [IsAuthenticated]
+    #permission_classes = [IsAuthenticated]
 
     def post(self, request):
         # 检查文件是否存在
@@ -426,7 +426,7 @@ class UserComplaintViewSet(ListCreateAPIView):
         serializer.save(complainer_id=self.request.user)
 '''
 class FollowUserDetailsViewSet(ListCreateAPIView,  RetrieveUpdateDestroyAPIView):
-    permission_classes = [IsAuthenticated]
+    #permission_classes = [IsAuthenticated]
     serializer_class = FollowSerializer
     lookup_field = 'followee'
     def create(self, request, *args, **kwargs):
@@ -442,7 +442,7 @@ class FollowUserDetailsViewSet(ListCreateAPIView,  RetrieveUpdateDestroyAPIView)
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 class modify_email(APIView):
-    permission_classes = [IsAuthenticated]
+    #permission_classes = [IsAuthenticated]
     def post(self, request):
         new_email = request.data.get('new_email')
         captcha = request.data.get('captcha')
@@ -472,7 +472,7 @@ class modify_email(APIView):
     #  创建关注
 
 class modify_password(APIView):
-    permission_classes = [IsAuthenticated]
+    #permission_classes = [IsAuthenticated]
     def post(self, request):
         new_password = request.data.get('new_password')
         new_password_repeat = request.data.get('new_password_repeat')
@@ -500,7 +500,7 @@ class modify_password(APIView):
 
 
 class FollowUserViewSet(ListCreateAPIView):
-    permission_classes = [IsAuthenticated]
+    #permission_classes = [IsAuthenticated]
     serializer_class = FollowSerializer
     """
     我关注的
@@ -510,7 +510,7 @@ class FollowUserViewSet(ListCreateAPIView):
         return Follow.objects.filter(follower=user)
 
 class FolloweeUserViewSet(ListCreateAPIView):
-    permission_classes = [IsAuthenticated]
+    #permission_classes = [IsAuthenticated]
     serializer_class = FollowSerializer
     """
     关注我的
@@ -521,7 +521,7 @@ class FolloweeUserViewSet(ListCreateAPIView):
 
 
 class ChatLogViewSet(ListCreateAPIView):
-    permission_classes = [IsAuthenticated]
+    #permission_classes = [IsAuthenticated]
     serializer_class = ChatLogSerializer
     pagination_class = StandardResultsSetPagination
 
@@ -549,7 +549,7 @@ class ChatLogViewSet(ListCreateAPIView):
         return Response(serializer.data)
 
 class MessageViewSet(ListCreateAPIView):
-    permission_classes = [IsAuthenticated]
+    #permission_classes = [IsAuthenticated]
     serializer_class = MessagesSerializer
     pagination_class = StandardResultsSetPagination
     def get_queryset(self):
@@ -567,3 +567,146 @@ class getPassword(APIView):
         return Response({
             "password":password
         })
+
+class UpdateSpecificUserView(APIView):
+
+    def put(self, request, user_id):
+        # 检查当前用户是否为管理员
+        if request.user.privilege != 1:
+            return Response({
+                "success": False,
+                "fail_code": "PERMISSION_DENIED",
+                "fail_msg": "您没有权限修改此用户信息"
+            }, status=status.HTTP_403_FORBIDDEN)
+
+        try:
+            user = User.objects.get(user_id=user_id)
+        except User.DoesNotExist:
+            return Response({
+                "success": False,
+                "fail_code": "USER_NOT_FOUND",
+                "fail_msg": "用户不存在"
+            }, status=status.HTTP_404_NOT_FOUND)
+
+        # 获取要更新的字段
+        update_fields = {}
+        username = request.data.get('username')
+        password = request.data.get('password')
+        email = request.data.get('email')
+        status_value = request.data.get('status')
+        privilege = request.data.get('privilege')
+        address = request.data.get('address')
+
+
+        # 验证和处理用户名更新
+        if username is not None:
+            if len(username) < 1 or len(username) > 30:
+                return Response({
+                    "success": False,
+                    "fail_code": "INVALID_USERNAME",
+                    "fail_msg": "用户名长度应在1-30个字符之间"
+                }, status=status.HTTP_400_BAD_REQUEST)
+            
+            # 检查用户名是否已被其他用户使用
+            if User.objects.filter(username=username).exclude(user_id=user_id).exists():
+                return Response({
+                    "success": False,
+                    "fail_code": "USERNAME_EXISTS",
+                    "fail_msg": "用户名已被使用"
+                }, status=status.HTTP_400_BAD_REQUEST)
+            
+            update_fields['username'] = username
+            user.username = username
+
+        # 验证和处理密码更新
+        if password is not None:
+            # 密码复杂性检查（长度6-18，包含数字、字母、特殊字符中的2种）
+            required_checks = [
+                any(char.isdigit() for char in password),  # 包含数字
+                any(char.isalpha() for char in password),  # 包含字母
+                any(not char.isalnum() for char in password)  # 包含特殊字符
+            ]
+            if not (6 <= len(password) <= 18 and sum(required_checks) >= 2):
+                return Response({
+                    "success": False,
+                    "fail_code": "INVALID_PASSWORD",
+                    "fail_msg": "密码应满足:6-18位,包含数字、字母、特殊字符中的2种"
+                }, status=status.HTTP_400_BAD_REQUEST)
+            
+            # 对密码加密
+            from django.contrib.auth.hashers import make_password
+            user.password = make_password(password)
+            update_fields['password'] = user.password
+
+        # 验证和处理邮箱更新
+        if email is not None:
+            import re
+            if not re.match(r'^[a-zA-Z0-9_-]+@[a-zA-Z0-9_-]+(\.[a-zA-Z0-9_-]+)+$', email):
+                return Response({
+                    "success": False,
+                    "fail_code": "INVALID_EMAIL",
+                    "fail_msg": "邮箱格式错误"
+                }, status=status.HTTP_400_BAD_REQUEST)
+            
+            # 检查邮箱是否已被其他用户使用
+            if User.objects.filter(email=email).exclude(user_id=user_id).exists():
+                return Response({
+                    "success": False,
+                    "fail_code": "EMAIL_EXISTS",
+                    "fail_msg": "邮箱已被使用"
+                }, status=status.HTTP_400_BAD_REQUEST)
+            
+            update_fields['email'] = email
+            user.email = email
+
+        # 验证和处理状态更新
+        if status_value is not None:
+            if status_value not in [0, 1]:  # 0: 正常, 1: 已封禁
+                return Response({
+                    "success": False,
+                    "fail_code": "INVALID_STATUS",
+                    "fail_msg": "用户状态值无效"
+                }, status=status.HTTP_400_BAD_REQUEST)
+            
+            update_fields['status'] = status_value
+            user.status = status_value
+
+        # 验证和处理权限更新
+        if privilege is not None:
+            if privilege not in [0, 1]:  # 0: 普通用户, 1: 管理员
+                return Response({
+                    "success": False,
+                    "fail_code": "INVALID_PRIVILEGE",
+                    "fail_msg": "用户权限值无效"
+                }, status=status.HTTP_400_BAD_REQUEST)
+            
+            update_fields['privilege'] = privilege
+            user.privilege = privilege
+
+        # 验证和处理地址更新
+        if address is not None:
+            if len(address) > 100:
+                return Response({
+                    "success": False,
+                    "fail_code": "INVALID_ADDRESS",
+                    "fail_msg": "地址长度不能超过100个字符"
+                }, status=status.HTTP_400_BAD_REQUEST)
+            
+            update_fields['address'] = address
+            user.address = address
+
+        # 保存更新
+        if update_fields:  # 只有当有字段需要更新时才保存
+            user.save(update_fields=update_fields.keys())
+
+        # 返回更新后的用户信息
+        serializer = UserSerializer(user)
+        return Response({
+            "success": True,
+            "message": "用户信息更新成功",
+            "data": serializer.data
+        }, status=status.HTTP_200_OK)
+
+    def patch(self, request, user_id):
+        # PATCH 方法允许部分更新
+        return self.put(request, user_id)

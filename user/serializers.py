@@ -8,7 +8,7 @@ class UserSerializer(serializers.ModelSerializer):
 class PublicUserSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.User
-        fields = ['user_id', 'username', 'avatar','status']
+        fields = ['user_id', 'username', 'avatar','status','created_at','privilege']
 
 class FollowSerializer(serializers.ModelSerializer):
     follower = PublicUserSerializer(read_only=True)
