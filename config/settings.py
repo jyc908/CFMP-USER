@@ -32,11 +32,11 @@ ASGI_APPLICATION = 'config.asgi.application'  # 指定ASGI入口
 # Application definition
 
 # python3 manage.py migrate
-MINIO_STORAGE_ENDPOINT = "47.94.167.198:9000" # Minio 服务器地址
-MINIO_STORAGE_ACCESS_KEY = '80rhHcZMlWxc7V3kT4Rs'      # 替换为你的 Access Key
-MINIO_STORAGE_SECRET_KEY = 'rKxfuJdaTwcjiu9YIsn3R4UCR9Q39Ft8ywK4LVCi'      # 替换为你的 Secret Key
+MINIO_STORAGE_ENDPOINT = "101.200.231.225:9100" # Minio 服务器地址
+MINIO_STORAGE_ACCESS_KEY = ' MtLNeBT0lJ7QKiwUhCBX'      # 替换为你的 Access Key
+MINIO_STORAGE_SECRET_KEY = 'fCzYlkjcrhf7sgOpUHmKV5JvoOWbfAe40ryM8k6W'      # 替换为你的 Secret Key
 MINIO_STORAGE_USE_HTTPS = False                   # 根据你的 Minio 配置调整
-MINIO_STORAGE_MEDIA_BUCKET_NAME = 'cfmp'    # 存储媒体文件的 Bucket 名称
+MINIO_STORAGE_MEDIA_BUCKET_NAME = 'img'    # 存储媒体文件的 Bucket 名称
 MINIO_STORAGE_AUTO_CREATE_MEDIA_BUCKET = True     # 自动创建 Bucket
 DEFAULT_FILE_STORAGE = 'minio_storage.storage.MinioMediaStorage'
 INSTALLED_APPS = [
