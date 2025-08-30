@@ -1,17 +1,21 @@
 # 使用官方 Python 3.11 的精简镜像，固定版本避免自动升级
 FROM python:3.11.10-slim-bookworm
 
-# 环境变量设置和系统依赖安装
+# 环境变量设置
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
     DEBIAN_FRONTEND=noninteractive
 
-# 删除默认源并添加国内源，安装系统依赖，配置pip源，升级pip工具
+# 删除默认源并添加国内源
 RUN rm -rf /etc/apt/sources.list.d/* && \
     rm -f /etc/apt/sources.list && \
-    cp /etc/apt/sources.list /etc/apt/sources.list.backup || true && \
-    COPY sources.list /etc/apt/ && \
-    apt-get update && apt-get install -y \
+    cp /etc/apt/sources.list /etc/apt/sources.list.backup || true
+
+# 复制您提供的 sources.list 文件
+COPY sources.list /etc/apt/
+
+# 安装系统依赖，支持 cryptography、Pillow、minio 等编译
+RUN apt-get update && apt-get install -y \
         build-essential \
         libmariadb-dev-compat \
         libmariadb-dev \
@@ -22,9 +26,11 @@ RUN rm -rf /etc/apt/sources.list.d/* && \
         python3-dev \
         pkg-config \
     && apt-get clean \
-    && rm -rf /var/lib/apt/lists/* \
-    && pip config set global.index-url https://pypi.tuna.tsinghua.edu.cn/simple/ \
-    && python -m pip install --upgrade pip setuptools wheel
+    && rm -rf /var/lib/apt/lists/*
+
+# 配置国内 pip 源并升级 pip 和安装构建工具
+RUN pip config set global.index-url https://pypi.tuna.tsinghua.edu.cn/simple/ && \
+    python -m pip install --upgrade pip setuptools wheel
 
 # 设置工作目录
 WORKDIR /app
@@ -37,8 +43,8 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY . .
 
 # 创建非root用户并设置权限
-RUN useradd --create-home --shell /bin/bash django \
-    && chown -R django:django /app
+RUN useradd --create-home --shell /bin/bash django && \
+    chown -R django:django /app
 
 # 切换到非root用户
 USER django
