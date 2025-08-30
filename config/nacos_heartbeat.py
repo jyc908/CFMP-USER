@@ -31,8 +31,8 @@ client = nacos.NacosClient(
     password=PASSWORD
 )
 
-# 获取本机 IP
-IP = "123.57.145.79"  # 替换为您的公网IP
+
+IP = socket.gethostbyname(socket.gethostname())
 
 
 def register_service():
