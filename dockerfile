@@ -8,8 +8,7 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
 
 # 删除默认源并添加国内源
 RUN rm -rf /etc/apt/sources.list.d/* && \
-    rm -f /etc/apt/sources.list && \
-    cp /etc/apt/sources.list /etc/apt/sources.list.backup || true
+    rm -f /etc/apt/sources.list
 
 # 复制您提供的 sources.list 文件
 COPY sources.list /etc/apt/
