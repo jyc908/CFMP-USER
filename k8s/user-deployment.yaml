@@ -42,6 +42,7 @@ spec:
           value: "30009"
         - name: NODE_IP
           value: 101.200.231.225"
+          
 
 ---
 apiVersion: v1
