@@ -2,9 +2,6 @@
 FROM python:3.11.10-slim-bookworm
 
 # 环境变量设置
-ENV PYTHONDONTWRITEBYTECODE=1 \
-    PYTHONUNBUFFERED=1 \
-    DEBIAN_FRONTEND=noninteractive
 
 # 删除默认源并添加国内源
 RUN rm -rf /etc/apt/sources.list.d/* && \
