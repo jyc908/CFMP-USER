@@ -27,9 +27,9 @@ spec:
         - name: DB_NAME
           value: "cfmp-user"
         - name: DB_USER
-          value: "user"
+          value: "root"
         - name: DB_PASSWORD
-          value: "xzw2qwQ~"
+          value: "123456"
         - name: DB_HOST
           value: "user-db-service"
         - name: DB_PORT
@@ -42,7 +42,7 @@ spec:
           value: "30009"
         - name: NODE_IP
           value: 101.200.231.225"
-          
+
 
 ---
 apiVersion: v1
