@@ -71,9 +71,7 @@ REST_FRAMEWORK = {
     'DEFAULT_FILTER_BACKENDS': [
         'django_filters.rest_framework.DjangoFilterBackend',  # 启用过滤
     ],
-    'DEFAULT_AUTHENTICATION_CLASSES': [
-        'config.authentication.JWTAuthentication',  # JWT认证
-    ],'DEFAULT_FILE_STORAGE':
+   'DEFAULT_FILE_STORAGE':
         'minio_storage.storage.MinioStaticStorage',
     'EXCEPTION_HANDLER': 'config.exceptions.custom_exception_handler',
     'DEFAULT_THROTTLE_RATES': {
