@@ -38,6 +38,10 @@ spec:
           value: "True"
         - name: SECRET_KEY
           value: "123"
+        - name: NODE_PORT
+          value: "30009"
+        - name: NODE_IP
+          value: 101.200.231.225"
 
 ---
 apiVersion: v1
@@ -53,7 +57,8 @@ spec:
     - protocol: TCP
       port: 8000
       targetPort: 8000
-  type: ClusterIP
+      nodePort: 30009
+  type: NodePort
 
 ---
 apiVersion: apps/v1
