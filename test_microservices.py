@@ -6,7 +6,7 @@ import os
 
 class MicroserviceIntegrationTest(unittest.TestCase):
     def setUp(self):
-        # 服务地址 - 根据您的部署环境调整
+        # 服务地址
         self.base_url = os.environ.get('TEST_BASE_URL', 'http://localhost')  
         self.headers = {'Content-Type': 'application/json'}
     
