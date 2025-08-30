@@ -12,15 +12,15 @@ COPY sources.list /etc/apt/
 
 # 安装系统依赖，支持 cryptography、Pillow、minio 等编译
 RUN apt-get update && apt-get install -y \
-        build-essential \
+        # MySQL客户端库 - 用于mysqlclient包
         libmariadb-dev-compat \
         libmariadb-dev \
+        # 图像处理库 - 用于Pillow包处理头像上传
         libjpeg-dev \
         zlib1g-dev \
-        libffi-dev \
+        # 加密库 - 用于cryptography包
         libssl-dev \
-        python3-dev \
-        pkg-config \
+        libffi-dev \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
