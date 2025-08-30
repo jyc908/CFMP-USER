@@ -7,7 +7,7 @@ echo "启动 CFMP Kubernetes 应用..."
 
 
 # 构建镜像
-echo "构建投诉服务镜像..."
+echo "构建用户服务镜像..."
 docker build -t user-service .
 
 export KUBECTL="k3s kubectl"
