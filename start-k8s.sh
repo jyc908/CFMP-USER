@@ -35,7 +35,7 @@ $KUBECTL wait --for=condition=ready pod -l app=user-db --timeout=300s 2>/dev/nul
 
 # 运行数据库迁移
 echo "运行数据库迁移..."
-$KUBECTL exec deployment/user-service -- python manager.py migrate
+$KUBECTL exec deployment/user-service -- python manage.py migrate
 
 # 显示访问地址
 echo ""
