@@ -568,7 +568,7 @@ class getPassword(APIView):
             "password":password
         })
 
-class UpdateSpecificUserView(APIView):
+class UpdateUserInfoView(APIView):
 
     def put(self, request, user_id):
         # 检查当前用户是否为管理员

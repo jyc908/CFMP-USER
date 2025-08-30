@@ -27,5 +27,4 @@ urlpatterns += [
     path('user/chat/<uuid:user_id>/',  views.ChatLogViewSet.as_view(), name = 'user-chat-detail'),
     path('user/message/',  views.MessageViewSet.as_view(), name='user-message-list'),
     path('user/password/',views.getPassword.as_view(),name="user-get-password"),
-    
 ]
