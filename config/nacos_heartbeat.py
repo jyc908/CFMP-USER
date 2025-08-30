@@ -5,6 +5,7 @@ import threading
 import time
 import os
 import sys
+import random
 
 SERVER_ADDRESSES = "123.57.145.79:8848"
 NAMESPACE = "public"  # 或者你的 namespace ID
@@ -22,7 +23,7 @@ def get_port_from_args(default=8000):
                 pass
     return default
 
-PORT = get_port_from_args()
+PORT = os.getenv("NODE_PORT", 30009)
 
 client = nacos.NacosClient(
     SERVER_ADDRESSES,
@@ -32,7 +33,7 @@ client = nacos.NacosClient(
 )
 
 
-IP = socket.gethostbyname(socket.gethostname())
+IP = os.getenv("NODE_IP", random.randint(30000,32767))
 
 
 def register_service():
