@@ -21,6 +21,13 @@ spec:
         imagePullPolicy: Never  # 在 CI/CD 中会被更新
         ports:
         - containerPort: 8000
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "250m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
         env:
         - name: DB_ENGINE
           value: "django.db.backends.mysql"
