@@ -135,7 +135,7 @@ spec:
       volumes:
       - name: mysql-storage
         persistentVolumeClaim:
-          claimName: mysql-pvc
+          claimName: user-mysql-pvc
 ---
 apiVersion: v1
 kind: Service
