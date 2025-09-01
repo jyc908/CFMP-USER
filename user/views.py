@@ -47,7 +47,11 @@ import re
 
 from .pagination import StandardResultsSetPagination
 
-
+def get_current_user(request):
+    user_id = request.META.get("HTTP-X-USER-UUID")
+    if not user_id:
+        return None
+    return User.objects.filter(user_id=user_id).first()
 def send_sms_code(to_email):
     # 生成邮箱验证码
     sms_code = '%06d' % random.randint(0, 999999)
@@ -361,14 +365,17 @@ class UserInfoView(ListCreateAPIView,RetrieveUpdateDestroyAPIView):
     #permission_classes = [IsAuthenticated]
 
     def get_object(self):
-        # 直接返回当前请求的用户对象（通过 Token 解析出的用户）
-        #print(1)
-        #print(1234)
-        return self.request.user
+        #从请求头获取HTTP-X-USER-UUID,
+        user_id = self.request.META.get("HTTP-X-USER-UUID")
+        if not user_id:
+            return None
+        return User.objects.filter(user_id=user_id).first()
+
     def get_queryset(self):
-        #print(2)
-        #print(123)
-        return User.objects.filter(user_id=self.request.user.user_id)
+        user_id = self.request.META.get("HTTP-X-USER-UUID")
+        if not user_id:
+            return User.objects.none()
+        return User.objects.filter(user_id=user_id)
 
 
 class UploadAvatarView(APIView):
@@ -380,7 +387,7 @@ class UploadAvatarView(APIView):
             return Response({'error': 'No avatar file provided'}, status=status.HTTP_400_BAD_REQUEST)
 
         file = request.FILES['avatar']
-        user = request.user
+        user = get_current_user(request) 
 
         try:
             # 保存文件到MinIO
@@ -430,13 +437,13 @@ class FollowUserDetailsViewSet(ListCreateAPIView,  RetrieveUpdateDestroyAPIView)
     serializer_class = FollowSerializer
     lookup_field = 'followee'
     def create(self, request, *args, **kwargs):
-        follower = self.request.user
+        follower = get_current_user(request)
         followee = User.objects.get(user_id=self.kwargs.get("followee"))
         Follow.objects.create(follower=follower, followee=followee)
         return Response(status=status.HTTP_201_CREATED)
 
     def delete(self, request, *args, **kwargs):
-        follower = self.request.user
+        follower = get_current_user(request)
         followee = User.objects.get(user_id=self.kwargs.get("followee"))
         Follow.objects.filter(follower=follower, followee=followee).delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
@@ -461,7 +468,7 @@ class modify_email(APIView):
             },status=status.HTTP_400_BAD_REQUEST)
 
         #修改邮箱
-        user = request.user
+        user = get_current_user(request) 
         user.email = new_email
         user.save()
         return Response({
@@ -488,8 +495,8 @@ class modify_password(APIView):
                 "fail_code":"PASSWORD_NOT_MATCH",
                 "fail_msg":"密码不匹配"
             },status=status.HTTP_400_BAD_REQUEST)
-        user = request.user
-        if varify_captcha(request.user.email,captcha)!=0:
+        user = get_current_user(request) 
+        if varify_captcha(user.email,captcha)!=0:
             return varify_captcha(request.user.email,captcha)
         user.password = make_password(new_password)
         user.save()
@@ -506,17 +513,15 @@ class FollowUserViewSet(ListCreateAPIView):
     我关注的
     """
     def get_queryset(self):
-        user = self.request.user
+        user = get_current_user(self.request) 
         return Follow.objects.filter(follower=user)
 
 class FolloweeUserViewSet(ListCreateAPIView):
-    #permission_classes = [IsAuthenticated]
     serializer_class = FollowSerializer
-    """
-    关注我的
-    """
     def get_queryset(self):
-        user = self.request.user
+        user = get_current_user(self.request)  # 修改为通过请求头获取用户
+        if not user:
+            return Follow.objects.none()
         return Follow.objects.filter(followee=user)
 
 
@@ -527,7 +532,7 @@ class ChatLogViewSet(ListCreateAPIView):
 
     def get_queryset(self):
         # 获取当前用户和聊天对象
-        me = self.request.user
+        me = get_current_user(self.request)
         chater = get_object_or_404(User, user_id=self.kwargs.get("user_id"))
 
         # 构建查询条件
@@ -554,7 +559,7 @@ class MessageViewSet(ListCreateAPIView):
     pagination_class = StandardResultsSetPagination
     def get_queryset(self):
         # 获取当前登录用户
-        user = self.request.user
+        user = get_current_user(self.request) 
         # 返回与当前用户关联的所有通知消息
         return user.messages.all().order_by('-created_at')
 
@@ -572,7 +577,8 @@ class UpdateUserInfoView(APIView):
 
     def put(self, request, user_id):
         # 检查当前用户是否为管理员
-        if request.user.privilege != 1:
+        user = get_current_user(request)  # 修改为通过请求头获取用户
+        if not user or user.privilege != 1:
             return Response({
                 "success": False,
                 "fail_code": "PERMISSION_DENIED",
