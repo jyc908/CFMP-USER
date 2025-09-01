@@ -375,16 +375,6 @@ class UserInfoView(ListCreateAPIView,RetrieveUpdateDestroyAPIView):
             }, status=status.HTTP_404_NOT_FOUND)
         return user
 
-    def get_queryset(self):
-        user = get_current_user(self.request)
-        if not user:
-            return Response({
-                "success": False,
-                "fail_code": "USER_NOT_FOUND",
-                "fail_msg": "用户不存在"
-            }, status=status.HTTP_404_NOT_FOUND)
-        return user
-
 
 class UploadAvatarView(APIView):
     #permission_classes = [IsAuthenticated]
