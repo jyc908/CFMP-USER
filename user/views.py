@@ -369,13 +369,13 @@ class UserInfoView(ListCreateAPIView,RetrieveUpdateDestroyAPIView):
         user = get_current_user(self.request)
         if not user:
             return None
-        return User.objects.filter(user_id=user.id).first()
+        return User.objects.filter(user_id=user.user_id).first()
 
     def get_queryset(self):
         user = get_current_user(self.request)
         if not user:
             return User.objects.none()
-        return User.objects.filter(user_id=user.id)
+        return User.objects.filter(user_id=user.user_id)
 
 
 class UploadAvatarView(APIView):
