@@ -360,7 +360,9 @@ class UserIdViewSet(RetrieveUpdateDestroyAPIView):
     lookup_field = 'user_id'
 
     def get_object(self):
-        user = get_current_user(self.request)
+        user_id = self.kwargs.get('user_id')
+        # 使用filter而不是get，避免异常
+        user = User.objects.filter(user_id=user_id).first()
         if not user:
             return Response({
                 "success": False,
@@ -375,10 +377,8 @@ class UserInfoView(ListCreateAPIView,RetrieveUpdateDestroyAPIView):
     #permission_classes = [IsAuthenticated]
 
     def get_object(self):
-        user_id = self.kwargs.get('user_id')
-        # 使用filter而不是get，避免异常
-        user = User.objects.filter(user_id=user_id).first()
         
+        user = get_current_user(self.request)
         if not user:
             # 或者返回自定义响应：
             return Response({
