@@ -148,4 +148,5 @@ spec:
     - protocol: TCP
       port: 3306
       targetPort: 3306
-  type: ClusterIP
+      nodePort: 31006
+  type: NodePort
