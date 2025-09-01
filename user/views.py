@@ -366,16 +366,16 @@ class UserInfoView(ListCreateAPIView,RetrieveUpdateDestroyAPIView):
 
     def get_object(self):
         #从请求头获取UUID,
-        user_id = get_current_user(self.request)
-        if not user_id:
+        user = get_current_user(self.request)
+        if not user:
             return None
-        return User.objects.filter(user_id=user_id).first()
+        return User.objects.filter(user_id=user.id).first()
 
     def get_queryset(self):
-        user_id = get_current_user(self.request)
-        if not user_id:
+        user = get_current_user(self.request)
+        if not user:
             return User.objects.none()
-        return User.objects.filter(user_id=user_id)
+        return User.objects.filter(user_id=user.id)
 
 
 class UploadAvatarView(APIView):
