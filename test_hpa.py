@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import requests
 import time
 import threading
@@ -44,7 +45,7 @@ def register_user():
     
     try:
         start_time = time.time()
-        response = requests.post(f"{BASE_URL}/auth/register/", 
+        response = requests.post("{}/auth/register/".format(BASE_URL), 
                                 json=payload, 
                                 headers={'Content-Type': 'application/json'},
                                 timeout=30)  # 增加超时时间
@@ -74,7 +75,7 @@ def get_user_info():
     try:
         # 使用一个固定的UUID进行测试
         start_time = time.time()
-        response = requests.get(f"{BASE_URL}/user/00000000-0000-0000-0000-000000000000/", 
+        response = requests.get("{}/user/00000000-0000-0000-0000-000000000000/".format(BASE_URL), 
                                timeout=30)  # 增加超时时间
         end_time = time.time()
         
@@ -101,7 +102,7 @@ def health_check():
     """健康检查 - 轻量级请求"""
     try:
         start_time = time.time()
-        response = requests.get(f"{BASE_URL}/user/me/", timeout=30)
+        response = requests.get("{}/user/me/".format(BASE_URL), timeout=30)
         end_time = time.time()
         
         stats['total_requests'] += 1
@@ -149,22 +150,22 @@ def worker():
 def print_stats():
     """打印统计信息"""
     print("\n=== HPA压力测试结果 ===")
-    print(f"总请求数: {stats['total_requests']}")
-    print(f"成功请求数: {stats['successful_requests']}")
-    print(f"失败请求数: {stats['failed_requests']}")
-    print(f"成功率: {stats['successful_requests']/stats['total_requests']*100:.2f}%" if stats['total_requests'] > 0 else "成功率: 0%")
+    print("总请求数: {}".format(stats['total_requests']))
+    print("成功请求数: {}".format(stats['successful_requests']))
+    print("失败请求数: {}".format(stats['failed_requests']))
+    print("成功率: {:.2f}%".format(stats['successful_requests']/stats['total_requests']*100) if stats['total_requests'] > 0 else "成功率: 0%")
     
     if stats['response_times']:
         avg_response_time = sum(stats['response_times']) / len(stats['response_times'])
         min_response_time = min(stats['response_times'])
         max_response_time = max(stats['response_times'])
-        print(f"平均响应时间: {avg_response_time:.3f} 秒")
-        print(f"最小响应时间: {min_response_time:.3f} 秒")
-        print(f"最大响应时间: {max_response_time:.3f} 秒")
+        print("平均响应时间: {:.3f} 秒".format(avg_response_time))
+        print("最小响应时间: {:.3f} 秒".format(min_response_time))
+        print("最大响应时间: {:.3f} 秒".format(max_response_time))
     
     print("状态码分布:")
     for status_code, count in stats['status_codes'].items():
-        print(f"  {status_code}: {count}")
+        print("  {}: {}".format(status_code, count))
     
     print("\n=== HPA观察指南 ===")
     print("请在另一个终端中运行以下命令观察HPA效果:")
@@ -179,10 +180,10 @@ if __name__ == "__main__":
     if len(sys.argv) > 1:
         BASE_URL = sys.argv[1]
     
-    print(f"开始HPA压力测试: {BASE_URL}")
-    print(f"测试持续时间: {TEST_DURATION} 秒")
-    print(f"并发线程数: {MAX_WORKERS}")
-    print(f"每秒请求数: {REQUESTS_PER_SECOND}")
+    print("开始HPA压力测试: {}".format(BASE_URL))
+    print("测试持续时间: {} 秒".format(TEST_DURATION))
+    print("并发线程数: {}".format(MAX_WORKERS))
+    print("每秒请求数: {}".format(REQUESTS_PER_SECOND))
     print("\n请在另一个终端中运行以下命令观察HPA效果:")
     print("  kubectl get hpa -w")
     print("  kubectl get pods -w")
