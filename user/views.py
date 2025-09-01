@@ -236,7 +236,7 @@ def generate_jwt_token(user):
         'alg': 'HS256'
     }
     payload = {
-        'user_id': user.user_id,
+        'user_id': str(user.user_id),
         'username': user.username,
         'key': settings.ISS,
         'exp': datetime.now(timezone.utc) + timedelta(days=3)  # 延长token有效期为3天

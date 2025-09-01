@@ -5,7 +5,6 @@ import threading
 import json
 import random
 import string
-from concurrent.futures import ThreadPoolExecutor, as_completed
 
 # HPA压测配置
 BASE_URL = "http://localhost:30009"  # 默认NodePort地址
@@ -22,13 +21,22 @@ stats = {
     'status_codes': {}
 }
 
+# 打开日志文件
+log_file = open("hpa_test_results.log", "w")
+
+def log_print(message):
+    """同时打印到屏幕和写入日志文件"""
+    print(message)
+    log_file.write(message + "\n")
+    log_file.flush()  # 确保立即写入文件
+
 def generate_random_email():
     """生成随机邮箱地址"""
-    return ''.join(random.choices(string.ascii_lowercase, k=8)) + '@test.com'
+    return ''.join(random.choice(string.ascii_lowercase) for _ in range(8)) + '@test.com'
 
 def generate_random_username():
     """生成随机用户名"""
-    return ''.join(random.choices(string.ascii_letters + string.digits, k=10))
+    return ''.join(random.choice(string.ascii_letters + string.digits) for _ in range(10))
 
 def register_user():
     """注册新用户 - 会产生数据库写入负载"""
@@ -138,7 +146,7 @@ def heavy_operation():
     # 注册用户操作（成本较高）
     register_user()
 
-def worker():
+def worker(stop_event):
     """工作线程函数"""
     while not stop_event.is_set():
         # 执行重操作以产生更多负载
@@ -149,61 +157,67 @@ def worker():
 
 def print_stats():
     """打印统计信息"""
-    print("\n=== HPA压力测试结果 ===")
-    print("总请求数: {}".format(stats['total_requests']))
-    print("成功请求数: {}".format(stats['successful_requests']))
-    print("失败请求数: {}".format(stats['failed_requests']))
-    print("成功率: {:.2f}%".format(stats['successful_requests']/stats['total_requests']*100) if stats['total_requests'] > 0 else "成功率: 0%")
+    log_print("\n=== HPA压力测试结果 ===")
+    log_print("总请求数: {}".format(stats['total_requests']))
+    log_print("成功请求数: {}".format(stats['successful_requests']))
+    log_print("失败请求数: {}".format(stats['failed_requests']))
+    log_print("成功率: {:.2f}%".format(stats['successful_requests']/float(stats['total_requests'])*100) if stats['total_requests'] > 0 else "成功率: 0%")
     
     if stats['response_times']:
         avg_response_time = sum(stats['response_times']) / len(stats['response_times'])
         min_response_time = min(stats['response_times'])
         max_response_time = max(stats['response_times'])
-        print("平均响应时间: {:.3f} 秒".format(avg_response_time))
-        print("最小响应时间: {:.3f} 秒".format(min_response_time))
-        print("最大响应时间: {:.3f} 秒".format(max_response_time))
+        log_print("平均响应时间: {:.3f} 秒".format(avg_response_time))
+        log_print("最小响应时间: {:.3f} 秒".format(min_response_time))
+        log_print("最大响应时间: {:.3f} 秒".format(max_response_time))
     
-    print("状态码分布:")
+    log_print("状态码分布:")
     for status_code, count in stats['status_codes'].items():
-        print("  {}: {}".format(status_code, count))
+        log_print("  {}: {}".format(status_code, count))
     
-    print("\n=== HPA观察指南 ===")
-    print("请在另一个终端中运行以下命令观察HPA效果:")
-    print("  kubectl get hpa -w")
-    print("  kubectl get pods -w")
-    print("  kubectl top pods")
+    log_print("\n=== HPA观察指南 ===")
+    log_print("请在另一个终端中运行以下命令观察HPA效果:")
+    log_print("  kubectl get hpa -w")
+    log_print("  kubectl get pods -w")
+    log_print("  kubectl top pods")
 
 if __name__ == "__main__":
     import sys
     
-    # 允许通过命令行参数指定基础URL
-    if len(sys.argv) > 1:
-        BASE_URL = sys.argv[1]
-    
-    print("开始HPA压力测试: {}".format(BASE_URL))
-    print("测试持续时间: {} 秒".format(TEST_DURATION))
-    print("并发线程数: {}".format(MAX_WORKERS))
-    print("每秒请求数: {}".format(REQUESTS_PER_SECOND))
-    print("\n请在另一个终端中运行以下命令观察HPA效果:")
-    print("  kubectl get hpa -w")
-    print("  kubectl get pods -w")
-    print("  kubectl top pods")
-    
-    # 创建停止事件
-    stop_event = threading.Event()
-    
-    # 创建线程池
-    with ThreadPoolExecutor(max_workers=MAX_WORKERS) as executor:
-        # 提交任务
-        futures = [executor.submit(worker) for _ in range(MAX_WORKERS)]
+    try:
+        # 允许通过命令行参数指定基础URL
+        if len(sys.argv) > 1:
+            BASE_URL = sys.argv[1]
         
+        log_print("开始HPA压力测试: {}".format(BASE_URL))
+        log_print("测试持续时间: {} 秒".format(TEST_DURATION))
+        log_print("并发线程数: {}".format(MAX_WORKERS))
+        log_print("每秒请求数: {}".format(REQUESTS_PER_SECOND))
+        log_print("\n请在另一个终端中运行以下命令观察HPA效果:")
+        log_print("  kubectl get hpa -w")
+        log_print("  kubectl get pods -w")
+        log_print("  kubectl top pods")
+        
+        # 创建停止事件
+        stop_event = threading.Event()
+        
+        # 创建线程池
+        threads = []
+        for i in range(MAX_WORKERS):
+            t = threading.Thread(target=worker, args=(stop_event,))
+            threads.append(t)
+            t.start()
+            
         # 运行指定时间后停止
         time.sleep(TEST_DURATION)
         stop_event.set()
         
         # 等待所有线程完成
-        for future in as_completed(futures):
-            pass
-    
-    # 打印统计结果
-    print_stats()
+        for t in threads:
+            t.join()
+        
+        # 打印统计结果
+        print_stats()
+    finally:
+        # 关闭日志文件
+        log_file.close()

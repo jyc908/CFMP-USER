@@ -46,7 +46,7 @@ class UserViewsTests(APITestCase):
     
     def generate_token(self, user):
         payload = {
-            'user_id': user.user_id,
+            'user_id': str(user.user_id),
             'username': user.username,
             'exp': timezone.now() + timedelta(days=3)
         }
