@@ -80,6 +80,7 @@ spec:
     - ReadWriteOnce
   persistentVolumeReclaimPolicy: Retain  # 保留数据，即使PVC被删除
   # 根据你的存储类型选择合适的配置
+  storageClassName: local-storage
   # 对于本地存储
   hostPath:
     path: /var/lib/user-service-pv  # 宿主机上的实际路径，确保有写权限
@@ -97,7 +98,7 @@ spec:
     requests:
       storage: 1Gi
   # 如果定义了特定的StorageClass，需要指定
-  # storageClassName: standard
+  storageClassName: local-storage
 
 ---
 apiVersion: apps/v1
