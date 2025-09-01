@@ -380,7 +380,7 @@ class UserInfoView(ListCreateAPIView,RetrieveUpdateDestroyAPIView):
         user = User.objects.filter(user_id=user_id).first()
         
         if not user:
-            或者返回自定义响应：
+            # 或者返回自定义响应：
             return Response({
                 "success": False,
                 "fail_msg": "用户不存在"
