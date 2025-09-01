@@ -374,7 +374,7 @@ class UserInfoView(ListCreateAPIView,RetrieveUpdateDestroyAPIView):
     serializer_class = UserSerializer
     #permission_classes = [IsAuthenticated]
 
-     def get_object(self):
+    def get_object(self):
         user_id = self.kwargs.get('user_id')
         # 使用filter而不是get，避免异常
         user = User.objects.filter(user_id=user_id).first()
