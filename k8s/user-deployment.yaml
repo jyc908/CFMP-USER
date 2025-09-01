@@ -1,3 +1,4 @@
+
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -17,7 +18,7 @@ spec:
       containers:
       - name: user-service
         image: user-service:latest
-        imagePullPolicy: Never
+        imagePullPolicy: Never  # 在 CI/CD 中会被更新
         ports:
         - containerPort: 8000
         resources:
@@ -68,7 +69,6 @@ spec:
   type: NodePort
 
 ---
-# 添加PersistentVolume定义
 apiVersion: v1
 kind: PersistentVolume
 metadata:
@@ -85,8 +85,8 @@ spec:
   hostPath:
     path: /var/lib/user-service-pv  # 宿主机上的实际路径，确保有写权限
     type: DirectoryOrCreate  # 如果路径不存在则创建
-
 ---
+
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
@@ -97,7 +97,6 @@ spec:
   resources:
     requests:
       storage: 1Gi
-  # 如果定义了特定的StorageClass，需要指定
   storageClassName: local-storage
 
 ---
@@ -118,21 +117,19 @@ spec:
       containers:
       - name: mysql
         image: mysql:8.0
+
         env:
         - name: MYSQL_ROOT_PASSWORD
           value: "123456"
         - name: MYSQL_DATABASE
           value: "cfmp-user"
-        - name: MYSQL_ROOT_HOST
-          value: "%"
+        - name: MYSQL_ROOT_HOST      # 添加这一行
+          value: "%"                 # 允许 root 从任何主机连接
         ports:
         - containerPort: 3306
         volumeMounts:
         - name: mysql-storage
           mountPath: /var/lib/mysql
-          # 添加子路径，确保数据存储在特定目录
-          subPath: mysql-data
-        # 添加安全上下文，解决权限问题
         livenessProbe:
           exec:
             command:
@@ -153,6 +150,7 @@ spec:
               - "mysql -h 127.0.0.1 -u root -p${MYSQL_ROOT_PASSWORD} -e 'SELECT 1'"
           initialDelaySeconds: 30
           periodSeconds: 5
+
       volumes:
       - name: mysql-storage
         persistentVolumeClaim:
@@ -164,7 +162,7 @@ metadata:
   name: user-db-service
 spec:
   selector:
-    app: user-service
+    app: user-db
   ports:
     - protocol: TCP
       port: 3306
