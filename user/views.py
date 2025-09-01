@@ -48,7 +48,7 @@ import re
 from .pagination import StandardResultsSetPagination
 
 def get_current_user(request):
-    user_id = request.META.get("HTTP-X-USER-UUID")
+    user_id = request.META.get("HTTP_X_USER_UUID")
     if not user_id:
         return None
     return User.objects.filter(user_id=user_id).first()
@@ -365,14 +365,14 @@ class UserInfoView(ListCreateAPIView,RetrieveUpdateDestroyAPIView):
     #permission_classes = [IsAuthenticated]
 
     def get_object(self):
-        #从请求头获取HTTP-X-USER-UUID,
-        user_id = self.request.META.get("HTTP-X-USER-UUID")
+        #从请求头获取HTTP_X_USER_UUID,
+        user_id = self.request.META.get("HTTP_X_USER_UUID")
         if not user_id:
             return None
         return User.objects.filter(user_id=user_id).first()
 
     def get_queryset(self):
-        user_id = self.request.META.get("HTTP-X-USER-UUID")
+        user_id = self.request.META.get("HTTP_X_USER_UUID")
         if not user_id:
             return User.objects.none()
         return User.objects.filter(user_id=user_id)
