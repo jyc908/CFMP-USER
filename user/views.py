@@ -133,6 +133,7 @@ class CaptchaView(APIView):
                     "fail_msg":"发送失败"
                 },status=status.HTTP_400_BAD_REQUEST)
         elif scene in need_token_scene:
+            '''
             auth = request.META.get('HTTP_AUTHORIZATION', '')
             if not auth:
                 print("not auth")
@@ -141,6 +142,7 @@ class CaptchaView(APIView):
                     "fail_msg":"验证失败"
                 },status=status.HTTP_400_BAD_REQUEST)
             JWTAuthentication.authenticate(self,request)
+            '''
             if send_sms_code(email) != 0:
                 return Response({
                     "success":True,
@@ -384,7 +386,7 @@ class UserInfoView(ListCreateAPIView,RetrieveUpdateDestroyAPIView):
                 "fail_msg": "用户不存在"
             }, status=status.HTTP_404_NOT_FOUND)
         serializer = self.serializer_class(user)
-        return serializer.data
+        return user
 
 
 class UploadAvatarView(APIView):
@@ -397,7 +399,10 @@ class UploadAvatarView(APIView):
 
         file = request.FILES['avatar']
         user = get_current_user(request) 
-
+        if not user: return Response({
+            "success": False,
+            "fail_msg": "用户不存在"
+        }, status=status.HTTP_404_NOT_FOUND)
         try:
             # 保存文件到MinIO
             user.avatar.save(file.name, file)  # 自动触发存储系统保存
@@ -477,7 +482,12 @@ class modify_email(APIView):
             },status=status.HTTP_400_BAD_REQUEST)
 
         #修改邮箱
-        user = get_current_user(request) 
+        user = get_current_user(request)
+        if not user: 
+            return Response({
+            "fail_code":"USER_NOT_FOUND",
+            "fail_msg":"用户不存在"
+        },status=status.HTTP_404_NOT_FOUND) 
         user.email = new_email
         user.save()
         return Response({
@@ -505,6 +515,11 @@ class modify_password(APIView):
                 "fail_msg":"密码不匹配"
             },status=status.HTTP_400_BAD_REQUEST)
         user = get_current_user(request) 
+        if not user:
+            return Response({
+                "fail_code":"USER_NOT_FOUND",
+                "fail_msg":"用户未找到"
+            },status=status.HTTP_404_NOT_FOUND)
         if varify_captcha(user.email,captcha)!=0:
             return varify_captcha(request.user.email,captcha)
         user.password = make_password(new_password)
