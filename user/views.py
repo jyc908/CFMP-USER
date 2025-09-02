@@ -388,6 +388,27 @@ class UserInfoView(ListCreateAPIView,RetrieveUpdateDestroyAPIView):
             }, status=status.HTTP_404_NOT_FOUND)
         return Response(self.serializer_class(user).data)
 
+    def update(self, request, *args, **kwargs):
+        user = get_current_user(request)
+        if not user:
+            return Response({
+                "success": False,
+                "fail_msg": "用户不存在"
+            }, status=status.HTTP_404_NOT_FOUND)
+
+        serializer = self.serializer_class(user, data=request.data, partial=False)
+        if serializer.is_valid():
+            serializer.save()
+            return Response({
+                "success": True,
+                "data": serializer.data
+            })
+        return Response({
+            "success": False,
+            "fail_msg": "数据验证失败",
+            "errors": serializer.errors
+        }, status=status.HTTP_400_BAD_REQUEST)
+
 
 class UploadAvatarView(APIView):
     #permission_classes = [IsAuthenticated]
