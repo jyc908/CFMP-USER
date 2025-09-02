@@ -396,7 +396,9 @@ class UserInfoView(ListCreateAPIView,RetrieveUpdateDestroyAPIView):
                 "fail_msg": "用户不存在"
             }, status=status.HTTP_404_NOT_FOUND)
 
-        serializer = self.serializer_class(user, data=request.data, partial=False)
+        # 区分 PUT(完整更新) 和 PATCH(部分更新)
+        partial = request.method == 'PATCH'
+        serializer = self.serializer_class(user, data=request.data, partial=partial)
         if serializer.is_valid():
             serializer.save()
             return Response({
@@ -408,6 +410,10 @@ class UserInfoView(ListCreateAPIView,RetrieveUpdateDestroyAPIView):
             "fail_msg": "数据验证失败",
             "errors": serializer.errors
         }, status=status.HTTP_400_BAD_REQUEST)
+
+    def partial_update(self, request, *args, **kwargs):
+        # 显式支持 PATCH 方法
+        return self.update(request, *args, **kwargs)
 
 
 class UploadAvatarView(APIView):
