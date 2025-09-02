@@ -521,7 +521,7 @@ class modify_password(APIView):
                 "fail_msg":"用户未找到"
             },status=status.HTTP_404_NOT_FOUND)
         if varify_captcha(user.email,captcha)!=0:
-            return varify_captcha(get_current_user(request).email, captcha)
+            return varify_captcha(user.email,captcha)
         user.password = make_password(new_password)
         user.save()
         return Response({
