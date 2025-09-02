@@ -386,7 +386,7 @@ class UserInfoView(ListCreateAPIView,RetrieveUpdateDestroyAPIView):
                 "success": False,
                 "fail_msg": "用户不存在"
             }, status=status.HTTP_404_NOT_FOUND)
-        return user
+        return Response(self.serializer_class(user).data)
 
 
 class UploadAvatarView(APIView):
