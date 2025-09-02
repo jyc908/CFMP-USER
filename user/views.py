@@ -371,7 +371,7 @@ class UserIdViewSet(RetrieveUpdateDestroyAPIView):
                 "fail_code": "USER_NOT_FOUND",
                 "fail_msg": "用户不存在"
             }, status=status.HTTP_404_NOT_FOUND)
-        serializer = self.serializer_class(user)
+
         return user
 
 class UserInfoView(ListCreateAPIView,RetrieveUpdateDestroyAPIView):
