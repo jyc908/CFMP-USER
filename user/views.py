@@ -376,16 +376,14 @@ class UserInfoView(ListCreateAPIView,RetrieveUpdateDestroyAPIView):
     serializer_class = UserSerializer
     #permission_classes = [IsAuthenticated]
 
-    def get_object(self):
-        
-        user = get_current_user(self.request)
+    def list(self, request, *args, **kwargs):
+        user = get_current_user(request)
         if not user:
-            # 或者返回自定义响应：
             return Response({
                 "success": False,
                 "fail_msg": "用户不存在"
             }, status=status.HTTP_404_NOT_FOUND)
-        
+        serializer = self.serializer_class(user)
         return user
 
 
