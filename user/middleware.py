@@ -10,12 +10,20 @@ class TokenAuthMiddleware:
         self.app = app
 
     async def __call__(self, scope, receive, send):
-        # 从headers中获取UUID（由网关添加）
+        # 首先尝试从headers中获取UUID
         headers = dict(scope.get('headers', []))
         user_uuid = headers.get(b'uuid', None)  # 注意这里使用小写的'uuid'
         
+        # 如果没有从headers获取到uuid，则尝试从查询参数中获取
+        if not user_uuid:
+            query_string = scope.get('query_string', b'').decode()
+            query_params = parse_qs(query_string)
+            uuid_list = query_params.get('uuid', [])
+            if uuid_list:
+                user_uuid = uuid_list[0]
+        
         if user_uuid:
-            # 将bytes转换为string
+            # 将bytes转换为string（如果是bytes类型）
             if isinstance(user_uuid, bytes):
                 user_uuid = user_uuid.decode('utf-8')
             scope['user'] = await self.get_user_by_uuid(user_uuid)
