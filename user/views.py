@@ -418,6 +418,7 @@ class UserInfoView(ListCreateAPIView,RetrieveUpdateDestroyAPIView):
 
 class UploadAvatarView(APIView):
     #permission_classes = [IsAuthenticated]
+    parser_classes = (MultiPartParser,)
 
     def post(self, request):
         # 检查文件是否存在
