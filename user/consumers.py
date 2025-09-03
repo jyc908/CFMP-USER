@@ -199,7 +199,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
                 receiver_id=receiver_id,
                 content=content
             )  # 存数据库
-            logger.info(f"消息保存成功，ID: {chat_log.chat_id}")
+
         except Exception as e:
             logger.error(f"保存消息到数据库时出错: {e}")
             raise
