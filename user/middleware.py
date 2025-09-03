@@ -10,18 +10,24 @@ class TokenAuthMiddleware:
         self.app = app
 
     async def __call__(self, scope, receive, send):
-        # 从headers中获取UUID（由网关添加）
-        headers = dict(scope.get('headers', []))
-        user_uuid = headers.get(b'uuid', None)  # 注意这里使用小写的'uuid'
-        
-        if user_uuid:
-            # 将bytes转换为string
+        # 首先尝试从查询参数获取UUID（兼容前端当前实现）
+        query_string = scope.get('query_string', b'').decode()
+        query_params = parse_qs(query_string)
+        user_uuid = query_params.get('uuid', [None])[0]
+
+        # 如果查询参数中没有，再尝试从headers获取（保持向后兼容）
+        if not user_uuid:
+            headers = dict(scope.get('headers', []))
+            user_uuid = headers.get(b'uuid', None)
+            # 处理bytes类型
             if isinstance(user_uuid, bytes):
                 user_uuid = user_uuid.decode('utf-8')
+
+        if user_uuid:
             scope['user'] = await self.get_user_by_uuid(user_uuid)
         else:
             scope['user'] = AnonymousUser()
-            
+
         return await self.app(scope, receive, send)
 
     @database_sync_to_async
