@@ -23,13 +23,17 @@ class TokenAuthMiddleware:
             if isinstance(user_uuid, bytes):
                 user_uuid = user_uuid.decode('utf-8')
 
+        print(f"WebSocket connection attempt with UUID: {user_uuid}")  # 添加日志
+
         if user_uuid:
-            scope['user'] = await self.get_user_by_uuid(user_uuid)
+            user = await self.get_user_by_uuid(user_uuid)
+            print(f"User lookup result: {user}")  # 添加日志
+            scope['user'] = user
         else:
             scope['user'] = AnonymousUser()
+            print("No UUID provided, setting AnonymousUser")  # 添加日志
 
         return await self.app(scope, receive, send)
-
     @database_sync_to_async
     def get_user_by_uuid(self, user_uuid):
         """
