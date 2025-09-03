@@ -594,16 +594,29 @@ class ChatLogViewSet(ListCreateAPIView):
         ).order_by('-send_at')  # 添加排序确保分页稳定
 
     def list(self, request, *args, **kwargs):
-        # 调用父类方法获取分页响应
-        queryset = self.filter_queryset(self.get_queryset())
-        page = self.paginate_queryset(queryset)
+        try:
+            # 调用父类方法获取分页响应
+            queryset = self.filter_queryset(self.get_queryset())
 
-        if page is not None:
-            serializer = self.get_serializer(page, many=True)
-            return self.get_paginated_response(serializer.data)
 
-        serializer = self.get_serializer(queryset, many=True)
-        return Response(serializer.data)
+            if not queryset.exists() and self.request.query_params.get('page', 1) != 1:
+                return Response({
+                    'count': 0,
+                    'results': []
+                })
+            page = self.paginate_queryset(queryset)
+
+            if page is not None:
+                serializer = self.get_serializer(page, many=True)
+                return self.get_paginated_response(serializer.data)
+
+            serializer = self.get_serializer(queryset, many=True)
+            return Response(serializer.data)
+        except Exception as e:
+            return Response({
+                'count': 0,
+                'results': []
+            })
 
 class MessageViewSet(ListCreateAPIView):
     #permission_classes = [IsAuthenticated]
